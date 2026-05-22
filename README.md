@@ -1,46 +1,46 @@
 # cors-scanner
 
-**Zero-dependency Python 3 CORS misconfiguration scanner.**  
-Detects reflected origins, null-origin bypass, subdomain/suffix/no-separator regex bypasses, and credential leakage — all with the standard library only.
+**CORS-Fehlkonfigurationsscanner in Python 3 — ohne externe Abhängigkeiten.**  
+Erkennt reflektierte Origins, Null-Origin-Bypass, Subdomain/Suffix/No-Separator-Regex-Bypasses und Credential-Leakage — ausschließlich mit der Python-Standardbibliothek.
 
 ---
 
-## What are CORS Misconfigurations?
+## Was sind CORS-Fehlkonfigurationen?
 
-Cross-Origin Resource Sharing (CORS) lets servers declare which external origins may read their responses. A misconfigured CORS policy can allow an attacker-controlled website to make **authenticated requests** to an API on behalf of a logged-in victim and read the response — effectively bypassing the Same-Origin Policy.
+Cross-Origin Resource Sharing (CORS) ermöglicht es Servern festzulegen, welche externen Origins ihre Antworten lesen dürfen. Eine falsch konfigurierte CORS-Policy kann es einer vom Angreifer kontrollierten Seite erlauben, **authentifizierte Requests** an eine API im Namen eines eingeloggten Opfers zu stellen und die Antwort auszulesen — die Same-Origin Policy wird damit faktisch ausgehebelt.
 
-**Why it matters:**
-- An attacker hosts a page at `evil.com`
-- The victim visits `evil.com` while logged in to `api.bank.com`
-- If `api.bank.com` reflects `evil.com` in `Access-Control-Allow-Origin` **and** sends `Access-Control-Allow-Credentials: true`, the attacker's JavaScript can read the authenticated API response
-- Account takeover, data exfiltration, CSRF amplification
+**Warum das relevant ist:**
+- Ein Angreifer betreibt eine Seite auf `evil.com`
+- Das Opfer besucht `evil.com`, während es bei `api.bank.com` eingeloggt ist
+- Wenn `api.bank.com` `evil.com` im `Access-Control-Allow-Origin`-Header zurückspiegelt **und** gleichzeitig `Access-Control-Allow-Credentials: true` sendet, kann das JavaScript des Angreifers die authentifizierte API-Antwort auslesen
+- Mögliche Folgen: Account Takeover, Datenexfiltration, CSRF-Amplifikation
 
 ---
 
-## Probe Table
+## Probe-Übersicht
 
-| # | Probe | Origin Sent | Risk if Reflected |
-|---|-------|-------------|-------------------|
-| 1 | Arbitrary origin reflection | `https://evil.com` | HIGH / CRITICAL |
-| 2 | Null origin reflection | `null` | HIGH / CRITICAL — sandboxed iframes bypass |
-| 3 | Subdomain prefix bypass | `https://<target>.evil.com` | HIGH / CRITICAL — weak `endsWith` regex |
-| 4 | TLD suffix bypass | `https://evil.com.<target>` | HIGH / CRITICAL — weak `startsWith` regex |
-| 5 | No-separator bypass | `https://<target>evil.com` | HIGH / CRITICAL — missing `$` anchor in regex |
+| # | Probe | Gesendete Origin | Risiko bei Reflection |
+|---|-------|------------------|----------------------|
+| 1 | Arbitrary Origin Reflection | `https://evil.com` | HIGH / CRITICAL |
+| 2 | Null Origin Reflection | `null` | HIGH / CRITICAL — Sandbox-iFrame-Bypass |
+| 3 | Subdomain Prefix Bypass | `https://<target>.evil.com` | HIGH / CRITICAL — schwache `endsWith`-Regex |
+| 4 | TLD Suffix Bypass | `https://evil.com.<target>` | HIGH / CRITICAL — schwache `startsWith`-Regex |
+| 5 | No-Separator Bypass | `https://<target>evil.com` | HIGH / CRITICAL — fehlendes `$`-Anker in Regex |
 
-**Severity classification:**
+**Schweregradklassifizierung:**
 
-| Severity | Condition |
-|----------|-----------|
-| `CRITICAL` | Origin reflected **and** `Access-Control-Allow-Credentials: true` |
-| `HIGH` | Origin reflected, no credentials header |
-| `INFO` | Wildcard `ACAO: *` (unauthenticated resources exposed) |
-| `PASS` | Origin not reflected |
+| Schweregrad | Bedingung |
+|-------------|-----------|
+| `CRITICAL` | Origin wird reflektiert **und** `Access-Control-Allow-Credentials: true` |
+| `HIGH` | Origin wird reflektiert, kein Credentials-Header |
+| `INFO` | Wildcard `ACAO: *` (nicht-authentifizierte Ressourcen exponiert) |
+| `PASS` | Origin wird nicht reflektiert |
 
 ---
 
 ## Installation
 
-No dependencies. Requires **Python 3.10+**.
+Keine Abhängigkeiten. Benötigt **Python 3.10+**.
 
 ```bash
 git clone https://github.com/G4MEOVER18/cors-scanner.git
@@ -50,46 +50,46 @@ python cors_scanner.py --help
 
 ---
 
-## Usage
+## Verwendung
 
 ```
 usage: cors_scanner [-h] [--json] [--cookies COOKIE_STRING] [--method METHOD] url
 
 positional arguments:
-  url                   Target URL to scan
+  url                   Ziel-URL für den Scan
 
 options:
-  -h, --help            show this help message and exit
-  --json                Output results as JSON (machine-readable)
+  -h, --help            Hilfe anzeigen
+  --json                Ergebnisse als JSON ausgeben (maschinenlesbar)
   --cookies COOKIE_STRING
-                        Session cookie string, e.g. "session=abc123; csrf=xyz"
-  --method METHOD       HTTP method for main request (default: GET).
-                        POST/PUT/DELETE also triggers an OPTIONS preflight probe.
+                        Session-Cookie-String, z. B. "session=abc123; csrf=xyz"
+  --method METHOD       HTTP-Methode für den Hauptrequest (Standard: GET).
+                        POST/PUT/DELETE löst zusätzlich eine OPTIONS-Preflight-Probe aus.
 ```
 
-### Examples
+### Beispiele
 
 ```bash
-# Basic scan
+# Einfacher Scan
 python cors_scanner.py https://api.example.com/v1/user
 
-# Authenticated scan (pass session cookie)
+# Authentifizierter Scan (Session-Cookie mitgeben)
 python cors_scanner.py https://api.example.com/v1/user \
     --cookies "session=abc123def456; csrf=xyz789"
 
-# Machine-readable JSON output (e.g. for CI pipelines)
+# Maschinenlesbare JSON-Ausgabe (z. B. für CI-Pipelines)
 python cors_scanner.py https://api.example.com/v1/user --json
 
-# Test POST endpoint + OPTIONS preflight
+# POST-Endpoint + OPTIONS-Preflight testen
 python cors_scanner.py https://api.example.com/v1/data --method POST
 
-# Chain into CI: exit code 1 on CRITICAL/HIGH
+# In CI einbinden: Exit-Code 1 bei CRITICAL/HIGH
 python cors_scanner.py https://api.example.com/v1/user || echo "CORS issue found!"
 ```
 
 ---
 
-## Example Output
+## Beispielausgabe
 
 ```
   ╔═══════════════════════════════════════╗
@@ -127,7 +127,7 @@ python cors_scanner.py https://api.example.com/v1/user || echo "CORS issue found
   ──────────────────────────────────────────────────
 ```
 
-### JSON output (`--json`)
+### JSON-Ausgabe (`--json`)
 
 ```json
 {
@@ -159,27 +159,27 @@ python cors_scanner.py https://api.example.com/v1/user || echo "CORS issue found
 
 ---
 
-## Legal Disclaimer
+## Rechtlicher Hinweis
 
-This tool is intended for **authorized security testing only**. Only scan systems you own or have explicit written permission to test. Unauthorized scanning may violate computer crime laws in your jurisdiction.
-
----
-
-## Contributing
-
-Issues and pull requests are welcome. Please keep the zero-dependency constraint — stdlib only.
+Dieses Tool ist ausschließlich für **autorisierte Sicherheitstests** gedacht. Nur Systeme scannen, die dir gehören oder für die du eine ausdrückliche schriftliche Genehmigung besitzt. Unautorisiertes Scannen kann in deiner Jurisdiktion gegen Gesetze zur Computerkriminalität verstoßen.
 
 ---
 
-## Donations
+## Mitmachen
 
-If this tool saved you time, consider a donation:
+Issues und Pull Requests sind willkommen. Bitte die Zero-Dependency-Anforderung einhalten — ausschließlich stdlib.
+
+---
+
+## Spenden
+
+Wenn das Tool dir Zeit gespart hat, freue ich mich über eine kleine Unterstützung:
 
 **Bitcoin:** `39vZWmnUwDReQ15BwqQXzyqVQ6U8LardEf`
 **PayPal:** [paypal.me/Freakbank1](https://paypal.me/Freakbank1)
 
 ---
 
-## License
+## Lizenz
 
-MIT License — Copyright (c) 2026 Yanis Ameseder. See [LICENSE](LICENSE).
+MIT License — Copyright (c) 2026 Yanis Ameseder. Siehe [LICENSE](LICENSE).
