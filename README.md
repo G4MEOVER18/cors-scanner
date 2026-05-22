@@ -175,7 +175,8 @@ Issues and pull requests are welcome. Please keep the zero-dependency constraint
 
 If this tool saved you time, consider a donation:
 
-**Bitcoin: `39vZWmnUwDReQ15BwqQXzyqVQ6U8LardEf`**
+**Bitcoin:** `39vZWmnUwDReQ15BwqQXzyqVQ6U8LardEf`
+**PayPal:** [paypal.me/Freakbank1](https://paypal.me/Freakbank1)
 
 ---
 
