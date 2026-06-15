@@ -176,6 +176,8 @@ Issues und Pull Requests sind willkommen. Bitte die Zero-Dependency-Anforderung 
 Wenn das Tool dir Zeit gespart hat, freue ich mich über eine kleine Unterstützung:
 
 **Bitcoin:** `39vZWmnUwDReQ15BwqQXzyqVQ6U8LardEf`
+
+**Kontakt:** [g4me.over.18@gmail.com](mailto:g4me.over.18@gmail.com)
 **PayPal:** [paypal.me/Freakbank1](https://paypal.me/Freakbank1)
 
 ---
