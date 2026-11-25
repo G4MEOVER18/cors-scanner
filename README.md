@@ -1,5 +1,7 @@
 # cors-scanner
 
+[![CI](https://github.com/G4MEOVER18/cors-scanner/actions/workflows/python-lint.yml/badge.svg)](https://github.com/G4MEOVER18/cors-scanner/actions/workflows/python-lint.yml)
+
 **CORS-Fehlkonfigurationsscanner in Python 3 — ohne externe Abhängigkeiten.**  
 Erkennt reflektierte Origins, Null-Origin-Bypass, Subdomain/Suffix/No-Separator-Regex-Bypasses und Credential-Leakage — ausschließlich mit der Python-Standardbibliothek.
 
